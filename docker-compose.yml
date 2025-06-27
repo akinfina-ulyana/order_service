@@ -6,7 +6,92 @@ services:
       - "8000:8000"
     volumes:
       - ./service:/service
-
+    env_file:
+      - .env
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - backend
       
+  database:
+    image: postgres:14.6-alpine
+    env_file: .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+
+  redis:
+    image: redis:7.0.5-alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+
+  worker:
+    build:
+        context: .
+    command: >
+      sh -c "sleep 5 && celery -A service worker --loglevel=info --without-heartbeat --without-gossip --without-mingle"
+    env_file: .env
+    volumes:
+        - ./service:/service
+    hostname: worker
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web-app:
+        condition: service_started
+    networks:
+      - backend
+
+  telegram-bot:
+    build:
+      context: .
+    container_name: telegram-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./service:/service
+    working_dir: /service
+    command: >
+      sh -c "PYTHONPATH=/service python /service/telegram_bot/bot.py"
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+
+networks:
+  backend:
+    driver: bridge
