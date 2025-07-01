@@ -93,18 +93,6 @@ async def cmd_start(message: types.Message):
     keyboard = ReplyKeyboardMarkup(keyboard=[[button]], resize_keyboard=True, one_time_keyboard=True)
     await message.answer("Нажмите кнопку ниже, чтобы поделиться номером", reply_markup=keyboard)
 
-@router.message(Command("test_db"))
-async def test_db_connection(message: types.Message):
-    print("Команда /test_db получена!")
-    try:
-        async with async_session() as session:
-            result = await session.execute(select(1))
-            test_value = result.scalar()
-            logger.info(f"DB test successful. Result: {test_value}")
-            await message.answer("✅ Подключение к БД работает!")
-    except Exception as e:
-        logger.error(f"DB connection failed: {e}")
-        await message.answer("❌ Ошибка подключения к БД")
 
 
 @router.message(F.contact)

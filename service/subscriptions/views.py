@@ -55,17 +55,7 @@ class TariffView(ReadOnlyModelViewSet):
     serializer_class = TariffSerializer
 
 
-# я пыталась сделать покупку подписок и кажется оно не работает-_-
 class SubscriptionViewSet(ViewSet):
-    # Получить список доступных тарифов
-    permission_classes = [AllowAny]
-
-    @csrf_exempt
-    @action(detail=False, methods=['GET'])
-    def tariffs(self, request):
-        tariffs = Tariff.objects.filter(is_active=True)
-        serializer = TariffSerializer(tariffs, many=True)
-        return Response(serializer.data)
 
     # Создание сессии оплаты в Stripe
     @csrf_exempt
@@ -251,7 +241,7 @@ class SubscriptionViewSet(ViewSet):
                     cancel_at_period_end=True
                 )
 
-                # Обновляем статус в нашей базе
+                # Обновляем статус в базе
                 subscription.auto_renewal = False
                 subscription.is_active = False
                 subscription.save()

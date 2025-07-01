@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.response import Response
 
 class ActiveSubscriptionMiddleware:
-    """Проверяем наличие активной подписки. Только для products url (Можно реализовать как декоратор для конкретных URL)"""
+    """Проверяем наличие активной подписки. Только для products url"""
     def __init__(self, get_response):
         self.get_response = get_response
 

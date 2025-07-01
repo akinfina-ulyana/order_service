@@ -13,7 +13,7 @@ def deactivate_expired_subscriptions():
     try:
         expired_subs = UserSubscription.objects.filter(
             is_active=True,
-            end_date__lt=timezone.now()  # Подписки с end_date в прошлом
+            end_date__lt=timezone.now()
         )
 
         count = expired_subs.count()

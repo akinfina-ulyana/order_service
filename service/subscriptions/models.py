@@ -24,7 +24,7 @@ class Tariff(models.Model):
     duration_days = models.PositiveIntegerField(verbose_name="Длительность (дни)", help_text="Сколько дней действует подписка")
     description = models.TextField(verbose_name="Описание тарифа", blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Цена", null=False)
-    stripe_price_id = models.CharField(max_length=100, blank=True, verbose_name="ID цены в Stripe")
+    stripe_price_id = models.CharField(max_length=100, blank=False, verbose_name="ID цены в Stripe")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -63,7 +63,6 @@ class UserSubscription(models.Model):
     def __str__(self):
         return f"Подписка {self.user.email} ({self.tariff.name}) до {self.end_date.strftime('%d.%m.%Y')}"
 
-    # возможно расчет выносить в celery или это глупо?
     def save(self, *args, **kwargs):
         """Автоматический расчёт end_date при создании"""
         if not self.end_date and self.tariff:

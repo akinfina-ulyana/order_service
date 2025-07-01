@@ -62,13 +62,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 quantity=item_data['quantity']
             )
 
-        # попробую отправлять тут
+
         bot.send_message(chat_id=chat_id, text='У вас новый заказ!')
-
-        # async def send_message(text, chat_id):
-        #     async with bot:
-        #         await bot.send_message(text=text, chat_id=chat_id)
-
         return order
 
 
