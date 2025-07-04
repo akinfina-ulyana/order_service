@@ -7,8 +7,8 @@ from datetime import timedelta
 
 class CustomUser(AbstractUser):
     phone = models.CharField(max_length=13, blank=True, verbose_name="Номер телефона")
-    telegram_id = models.BigIntegerField(null=True, blank=True, unique=True, verbose_name="ID пользователя")
-    chat_id = models.BigIntegerField(null=True, blank=True, unique=True, verbose_name="ID чата с пользователем")
+    telegram_id = models.BigIntegerField(blank=True, default=0, verbose_name="ID пользователя")
+    chat_id = models.BigIntegerField(blank=True, default=0, verbose_name="ID чата с пользователем")
 
     class Meta:
         verbose_name = "Пользователь"
@@ -52,7 +52,6 @@ class UserSubscription(models.Model):
     auto_renewal = models.BooleanField(default=False, verbose_name="Автопродление")
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending', verbose_name="Статус оплаты")
     stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="ID после создания сессии")
-    # payment_data = models.JSONField(default=dict, blank=True, verbose_name="Данные платежа")
 
     class Meta:
         verbose_name = "Подписка пользователя"
@@ -63,11 +62,11 @@ class UserSubscription(models.Model):
     def __str__(self):
         return f"Подписка {self.user.email} ({self.tariff.name}) до {self.end_date.strftime('%d.%m.%Y')}"
 
-    def save(self, *args, **kwargs):
-        """Автоматический расчёт end_date при создании"""
-        if not self.end_date and self.tariff:
-            self.end_date = self.start_date + timedelta(days=self.tariff.duration_days)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     """Автоматический расчёт end_date при создании"""
+    #     if not self.end_date and self.tariff:
+    #         self.end_date = self.start_date + timedelta(days=self.tariff.duration_days)
+    #     super().save(*args, **kwargs)
 
     @property
     def days_remaining(self):

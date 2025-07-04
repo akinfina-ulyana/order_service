@@ -1,3 +1,4 @@
+from datetime import timedelta
 from email.policy import default
 
 from django.utils import timezone
@@ -46,7 +47,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                   'end_date', 'is_active', 'auto_renewal', 'payment_status']
         read_only_fields = ['id', 'user', 'start_date', 'end_date', 'is_active', 'payment_status']
 
-
         def validate(self, attrs):
             # сериализатор имеет доступ к текущему запросу (request) через self.context
             user = self.context['request'].user
@@ -54,6 +54,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             if UserSubscription.objects.filter(user=user, is_active=True, end_date__gte=timezone.now()).exists():
                 raise ValidationError('У вас есть активная подписка')
             return attrs
+
+
 
 class SubscriptionWithTariffSerializer(serializers.ModelSerializer):
     tariff_name = serializers.CharField(source='tariff.name')
