@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from venv import logger
 
 from django.utils import timezone
@@ -56,6 +56,7 @@ class TariffView(ReadOnlyModelViewSet):
 
 
 class SubscriptionViewSet(ViewSet):
+    permission_classes = [AllowAny]
 
     # Создание сессии оплаты в Stripe
     @csrf_exempt
@@ -72,6 +73,7 @@ class SubscriptionViewSet(ViewSet):
 
             # Создаем подписку в статусе "ожидает оплаты"
             subscription = UserSubscription.objects.create(user=user, tariff=tariff, start_date=timezone.now(),
+                                                           end_date=timezone.now()+timedelta(days=tariff.duration_days),
                                                            is_active=False, payment_status='pending')
 
             # Создаем сессию оплаты в Stripe
@@ -104,7 +106,7 @@ class SubscriptionViewSet(ViewSet):
 
     # Обработка успешной оплаты (для вебхука)
     @csrf_exempt
-    @action(detail=False, methods=['POST'])
+    @action(detail=False, methods=['POST'], permission_classes=[AllowAny], authentication_classes=[])
     def webhook(self, request):
         payload = request.body
         sig_header = request.headers.get('Stripe-Signature')  # ('Stripe-Signature')
